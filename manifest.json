@@ -5,6 +5,9 @@
     ]
   },
   "description": "",
+  "icons": {
+	  "128": "icon.png"
+  },
   "manifest_version": 2,
   "name": "stopNaviByRegEx",
   "options_ui": {
@@ -17,5 +20,5 @@
     "webRequestBlocking",
     "<all_urls>"
   ],
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
