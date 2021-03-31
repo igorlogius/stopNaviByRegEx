@@ -1,0 +1,22 @@
+{
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "description": "",
+  "manifest_version": 2,
+  "name": "stopNavigation",
+  "options_ui": {
+    "page": "options.html"
+  },
+  "permissions": [
+    "tabs",
+    "notifications",
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "version": "0.1.0"
+}
