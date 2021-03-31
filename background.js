@@ -1,6 +1,6 @@
 
 // extId ???
-const extId = "stopNavigation";	
+const extId = "stopNaviByRegEx";	
 const temporary = browser.runtime.id.endsWith('@temporary-addon'); // debugging?
 
 function log(level, msg) {
@@ -59,4 +59,3 @@ browser.webRequest.onBeforeRequest.addListener(
   ["blocking"]
 );
 
-browser.tabs.onUpdated.addListener(onUpdated);

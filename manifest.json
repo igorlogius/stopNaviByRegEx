@@ -6,12 +6,11 @@
   },
   "description": "",
   "manifest_version": 2,
-  "name": "stopNavigation",
+  "name": "stopNaviByRegEx",
   "options_ui": {
     "page": "options.html"
   },
   "permissions": [
-    "tabs",
     "notifications",
     "storage",
     "webRequest",
