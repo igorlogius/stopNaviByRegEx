@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# variables
 ID="stopNaviByRegEx"
 BRANCH="main"
 
