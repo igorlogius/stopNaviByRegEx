@@ -12,9 +12,7 @@ function log(level, msg) {
 	}
 };
 
-async function onBeforeRequest(details) {
-	//if(details.frameId !== 0) { return;} // not required because main_frame used in filter
-
+async function matches(tabUrl) {
 	const selectors = await ((async () => {
 		try {
 			const tmp = await browser.storage.local.get('selectors');
@@ -37,20 +35,35 @@ async function onBeforeRequest(details) {
 					selector.url_regex = selector.url_regex.trim();
 					if(selector.url_regex !== ''){ 
 
-						if((new RegExp(selector.url_regex)).test(details.url) ){
-							browser.notifications.create(extId, {
-								"type": "basic",
-								"iconUrl": browser.runtime.getURL("icon.png"),
-								"title": 'Stopped Navigation', 
-								"message":  'RegularExpression: ' + selector.url_regex + '\n matched with target url: ' + details.url
-							});
-							return {cancel: true};
+						if((new RegExp(selector.url_regex)).test(tabUrl) ){
+							//return {cancel: true};
+							return selector.url_regex;
 						}
 					}
 				}
 			}
 		}
 	}
+	return null;
+}
+
+let taburls = {};
+
+async function onBeforeRequest(details) {
+	//if(details.frameId !== 0) { return;} // not required because main_frame used in filter
+
+	//if(typeof details.url !== 'string') {return;}
+	const match = await matches(details.url);
+	if(match !== null) {
+		browser.notifications.create(extId, {
+			"type": "basic",
+			"iconUrl": browser.runtime.getURL("icon.png"),
+			"title": 'Stopped Navigation', 
+			"message":  'RegularExpression: ' + match + '\n matched with target url: ' + details.url
+		});
+		return {cancel: true};
+	}
+	taburls[details.tabId] = details.url;
 }
 
 browser.webRequest.onBeforeRequest.addListener(
@@ -58,4 +71,33 @@ browser.webRequest.onBeforeRequest.addListener(
   {urls: ['<all_urls>'], types: ['main_frame'] },
   ["blocking"]
 );
+
+async function onHistoryStateUpdated(details) {
+
+	if(taburls[details.tabId] !== details.url){
+		const match = await matches(details.url);
+		if( match !== null) {
+
+			// mmmh, ... surely not the best idea ... but it kind of works  
+			await browser.tabs.executeScript(details.tabId, {code: `window.history.go(-1);`});
+
+			browser.notifications.create(extId, {
+				"type": "basic",
+				"iconUrl": browser.runtime.getURL("icon.png"),
+				"title": 'Stopped Navigation', 
+				"message":  'RegularExpression: ' + match + '\n matched with target url: ' + details.url
+			});
+		}
+	}
+}
+
+function onRemoved(tabId, removeInfo) {
+	if(typeof taburls[tabId] !== 'undefined'){
+		//log('debug', 'cleanup ' + tabId);
+		delete taburls[tabId];
+	}
+}
+
+browser.webNavigation.onHistoryStateUpdated.addListener(onHistoryStateUpdated);
+browser.tabs.onRemoved.addListener(onRemoved);
 
